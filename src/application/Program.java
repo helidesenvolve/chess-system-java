@@ -27,7 +27,7 @@ public class Program {
 				boolean[][] possibleMoves = chessMatch.possibleMoves(source);
 				UI.clearScreen();
 				UI.printBoard(chessMatch.getPieces(), possibleMoves); //versao que vai imprimir os movimentos possiveis
-				
+				// sobrecarga - mais de uma veraão do msm método, variando a lista de parametros (printBoard)
 				
 				System.out.println();
 				System.out.print("Target: ");
