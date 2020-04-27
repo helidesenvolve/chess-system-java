@@ -29,6 +29,8 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		Position source = sourcePosition.toPosition();
 		Position target = targetPosition.toPosition();
 		validateSourcePosition(source);             //validar a posição de origem, se não existit irá lança uma exceção
+		validateTargetPosition(source, target);
+		
 		Piece capturedPiece = makeMove(source, target);  //movimento 
 		return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
 	}
@@ -47,6 +49,14 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		if(!board.piece(position).isThereAnyPossibleMove()){   //testar se há algum movimento possível
 			throw new ChessException("There is no possible moves for the chosen piece");
 		}
+	}
+	
+	private void validateTargetPosition(Position source, Position target){
+		if(!board.piece(source).possibleMove(target)){
+			throw new ChessException("The chosen piece can´t move to target position.");
+		}
+		
+		
 	}
 	private void placeNewPiece(char column, int row, ChessPiece piece){
 		board.placePiece(piece,new ChessPosition(column, row).toPosition());
