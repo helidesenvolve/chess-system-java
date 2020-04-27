@@ -8,11 +8,23 @@ import chess.pieces.Rook;
 
 public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	
+	private int turn;
+	private Color currentPlayer;
 	private Board board;  //tabuleiro
 
 	public ChessMatch(){
 		board = new Board(8, 8); //tabuleiro do xadrez
 		initialSetup();
+		currentPlayer = Color.WHITE;   //o jogador no inicio da partida é o white
+		turn = 1; //turno no inicio da partida vale 1
+	}
+	
+	public int getTurn(){
+		return turn;
+	}
+	
+	public Color getCurrentPlayer(){
+		return currentPlayer;
 	}
 	
 	public ChessPiece[][]getPieces(){ //o pragram vai enxergar apenas a peça de xadrez(ChessPiece). e nao a camada de tabuleiro (PIece).
@@ -37,8 +49,8 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		Position target = targetPosition.toPosition();
 		validateSourcePosition(source);             //validar a posição de origem, se não existit irá lança uma exceção
 		validateTargetPosition(source, target);
-		
 		Piece capturedPiece = makeMove(source, target);  //movimento 
+		nextTurn();
 		return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
 	}
 	
@@ -53,6 +65,10 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		if(!board.thereIsAPiece(position)){
 			throw new ChessException("There is no piece on source position");
 		}
+		if(currentPlayer != ((ChessPiece)board.piece(position)).getColor()){
+			throw new ChessException("The chosen piece is not yours");
+		}
+				
 		if(!board.piece(position).isThereAnyPossibleMove()){   //testar se há algum movimento possível
 			throw new ChessException("There is no possible moves for the chosen piece");
 		}
@@ -62,9 +78,14 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		if(!board.piece(source).possibleMove(target)){
 			throw new ChessException("The chosen piece can´t move to target position.");
 		}
-		
-		
 	}
+	
+	private void nextTurn(){
+		turn++; //incrementer o turno
+		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;  //condição condicional ternaria
+	}
+		
+	
 	private void placeNewPiece(char column, int row, ChessPiece piece){
 		board.placePiece(piece,new ChessPosition(column, row).toPosition());
 	}
