@@ -44,8 +44,10 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		if(!board.thereIsAPiece(position)){
 			throw new ChessException("There is no piece on source position");
 		}
+		if(!board.piece(position).isThereAnyPossibleMove()){   //testar se há algum movimento possível
+			throw new ChessException("There is no possible moves for the chosen piece");
+		}
 	}
-	
 	private void placeNewPiece(char column, int row, ChessPiece piece){
 		board.placePiece(piece,new ChessPosition(column, row).toPosition());
 	}
