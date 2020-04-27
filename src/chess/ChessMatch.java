@@ -25,6 +25,13 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		return mat;
 	}
 	
+	public boolean[][] possibleMoves(ChessPosition sourcePosition){ //marcar as posiçoes possiveis no tabuleiro
+		Position position = sourcePosition.toPosition();
+		validateSourcePosition(position);
+		return board.piece(position).possibleMoves();
+	}
+	
+	
 	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition){
 		Position source = sourcePosition.toPosition();
 		Position target = targetPosition.toPosition();
