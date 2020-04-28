@@ -1,7 +1,9 @@
 package chess;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import boardgame.Board;
 import boardgame.Piece;
@@ -14,6 +16,7 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	private int turn;
 	private Color currentPlayer;
 	private Board board;  //tabuleiro
+	private boolean check;
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();  //lista com as peças que estao no tabuleiro
 	private List<Piece> capturedPieces = new ArrayList<>();  //lista das peças capturadas
@@ -23,6 +26,7 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		initialSetup();
 		currentPlayer = Color.WHITE;   //o jogador no inicio da partida é o white
 		turn = 1; //turno no inicio da partida vale 1
+		check = false;  //por padrão uma propriedade boolean ja inicia com "false", so coloca aqui se quiser enfatizar
 	}
 	
 	public int getTurn(){
@@ -31,6 +35,10 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	
 	public Color getCurrentPlayer(){
 		return currentPlayer;
+	}
+	
+	public boolean getCheck(){
+		return check;
 	}
 	
 	public ChessPiece[][]getPieces(){ //o pragram vai enxergar apenas a peça de xadrez(ChessPiece). e nao a camada de tabuleiro (PIece).
@@ -56,6 +64,14 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		validateSourcePosition(source);             //validar a posição de origem, se não existit irá lança uma exceção
 		validateTargetPosition(source, target);
 		Piece capturedPiece = makeMove(source, target);  //movimento 
+		
+		if(testCheck(currentPlayer)){        //se o jogador atual se coloca em cheque
+			undoMove(source,  target, capturedPiece);  //desfaz a jogada
+			throw new ChessException ("You can't put yourself in check");
+		}
+		
+		check = (testCheck(opponent(currentPlayer))) ? true : false;  //se o openente ficou em cheque recebe true senão false
+		
 		nextTurn();
 		return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
 	}
@@ -71,6 +87,18 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		}
 		
 		return capturedPiece;   //retorna a peça capturada
+	}
+	
+	private void undoMove(Position source, Position target, Piece capturedPiece){  //desfazer o movimento
+		Piece p = board.removePiece(target);
+		board.placePiece(p, source);
+		
+		if (capturedPiece != null){    //tem voltar a peça na posição de destino
+			board.placePiece(capturedPiece, target);
+			capturedPieces.remove(capturedPiece);   //tira a peça de peças capturadas
+			piecesOnTheBoard.add(capturedPiece);    //adiciona a peça na lista de peças no tabuleiro
+		}
+		
 	}
 	
 	private void validateSourcePosition(Position position){
@@ -96,7 +124,33 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		turn++; //incrementer o turno
 		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;  //condição condicional ternaria
 	}
-		
+	
+	private Color opponent (Color color){  //metodo que dado uma cor devolve o oponente desta cor
+		return (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
+	}
+	
+	private ChessPiece king (Color color){
+		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());
+		for(Piece p : list){
+			if(p instanceof King){  //"é um"
+				return (ChessPiece) p;   //downcast
+			}
+		}
+		throw new IllegalStateException("There is no" + color + " king on the board"); // não é p acontecer, se acontecer é um erro no sistema	
+	}
+	
+	private boolean testCheck(Color color){
+		Position kingPosition = king(color).getChessPosition().toPosition();
+		List<Piece> opponentPieces = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == opponent(color)).collect(Collectors.toList());
+		for (Piece p : opponentPieces){   //para cada peça p na lista de peças do oponente...
+			boolean[][] mat = p.possibleMoves();   //matris de movimentos possiveis da peça adversaria p.
+			if (mat[kingPosition.getRow()][kingPosition.getColumn()]){  //se o rei na posição da matriz acima, o rei estara em cheque
+				return true;
+			}
+		}
+		return false;  //se nenhuma peça p tem movimento possivel ate a posição na matriz onde esta o rei.
+	}
+	
 	
 	private void placeNewPiece(char column, int row, ChessPiece piece){
 		board.placePiece(piece,new ChessPosition(column, row).toPosition());  //colocar a peça no tabuleiro

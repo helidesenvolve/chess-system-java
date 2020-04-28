@@ -31,7 +31,7 @@ public class ChessPosition { //posição no tabuleiro. coluna de 'a' até 'h' e lin
 	}
 	
 	protected static ChessPosition fromPosition(Position position){
-		return new ChessPosition((char)('a' - position.getColumn()), 8 - position.getRow());
+		return new ChessPosition((char)('a' + position.getColumn()), 8 - position.getRow());
 	}
 	
 	@Override
