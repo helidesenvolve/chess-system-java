@@ -18,7 +18,7 @@ public class Program {
 		ChessMatch chessMatch = new ChessMatch();
 		List<ChessPiece> captured = new ArrayList<>(); //lista de peças capturadas
 		
-		while(true){
+		while(!chessMatch.getCheckMate()){
 			try{
 				UI.clearScreen(); //limpar a tela toda vez que voltar no while
 					
@@ -49,7 +49,9 @@ public class Program {
 				System.out.println(e.getMessage());
 				sc.nextLine();
 			}
-			} 
-		}
+		} 
+		UI.clearScreen();  //terminou o "while", limpa a tela e...
+		UI.printMatch(chessMatch, captured); //mostra a tela finalizada
+	}
 
 }

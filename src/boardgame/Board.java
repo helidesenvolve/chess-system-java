@@ -62,8 +62,6 @@ public class Board {
 		return aux;   //peça que foi retirada
 	}
 	
-	
-	
 	private boolean positionExists(int row, int column){
 		return row >= 0 && row < rows && column >= 0 && column < columns;
 	}
@@ -77,12 +75,6 @@ public class Board {
 			throw new BoardException("Position not on the board");
 		}
 		return piece(position) != null;
-	}
-	
-	
-	
-	
-	
-	
+	}	
 }
-;
+

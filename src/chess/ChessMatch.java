@@ -17,6 +17,7 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	private Color currentPlayer;
 	private Board board;  //tabuleiro
 	private boolean check;
+	private boolean checkMate;
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();  //lista com as peças que estao no tabuleiro
 	private List<Piece> capturedPieces = new ArrayList<>();  //lista das peças capturadas
@@ -39,6 +40,10 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	
 	public boolean getCheck(){
 		return check;
+	}
+	
+	public boolean getCheckMate(){
+		return checkMate;
 	}
 	
 	public ChessPiece[][]getPieces(){ //o pragram vai enxergar apenas a peça de xadrez(ChessPiece). e nao a camada de tabuleiro (PIece).
@@ -72,8 +77,13 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		
 		check = (testCheck(opponent(currentPlayer))) ? true : false;  //se o openente ficou em cheque recebe true senão false
 		
-		nextTurn();
-		return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
+		if(testCheckMate(opponent(currentPlayer))){
+			checkMate = true;
+		}
+		else{
+			nextTurn();  //proximo turno(jogada)
+		}
+			return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
 	}
 	
 	private Piece makeMove (Position source, Position target){
@@ -151,6 +161,31 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		return false;  //se nenhuma peça p tem movimento possivel ate a posição na matriz onde esta o rei.
 	}
 	
+	private boolean testCheckMate(Color color){
+		if(!testCheck(color)){  //se esta cor não esta em cheque significa que tb n esta em cheque mate
+			return false;
+		}
+		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());
+		for(Piece p : list){
+			boolean[][] mat = p.possibleMoves();
+			for(int i= 0; i < board.getRows(); i++){
+				for(int j = 0; j < board.getColumns(); j++){
+					if(mat[i][j]){  //movimento possivel(possibleMoves)
+						Position source = ((ChessPiece)p).getChessPosition().toPosition();
+						Position target = new Position(i, j);
+						Piece capturedPiece = makeMove(source, target);
+						boolean testCheck = testCheck(color);
+						undoMove(source, target, capturedPiece); //defazer o movimento
+						if(!testCheck){     
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true; //esta em ccheckMate
+	}
+	
 	
 	private void placeNewPiece(char column, int row, ChessPiece piece){
 		board.placePiece(piece,new ChessPosition(column, row).toPosition());  //colocar a peça no tabuleiro
@@ -159,20 +194,13 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	}
 	
 	private void initialSetup(){
-		placeNewPiece('c', 1, new Rook(board, Color.WHITE));
-        placeNewPiece('c', 2, new Rook(board, Color.WHITE));
-        placeNewPiece('d', 2, new Rook(board, Color.WHITE));
-        placeNewPiece('e', 2, new Rook(board, Color.WHITE));
-        placeNewPiece('e', 1, new Rook(board, Color.WHITE));
-        placeNewPiece('d', 1, new King(board, Color.WHITE));
+		placeNewPiece('h', 7, new Rook(board, Color.WHITE));
+        placeNewPiece('d', 1, new Rook(board, Color.WHITE));
+        placeNewPiece('e', 1, new King(board, Color.WHITE));
         
-        placeNewPiece('c', 7, new Rook(board, Color.BLACK));
-        placeNewPiece('c', 8, new Rook(board, Color.BLACK));
-        placeNewPiece('d', 7, new Rook(board, Color.BLACK));
-        placeNewPiece('e', 7, new Rook(board, Color.BLACK));
-        placeNewPiece('e', 8, new Rook(board, Color.BLACK));
-        placeNewPiece('d', 8, new King(board, Color.BLACK));
-
+        placeNewPiece('b', 8, new Rook(board, Color.BLACK));
+        placeNewPiece('a', 8, new King(board, Color.BLACK));
+        
 	}		
 	
 }
