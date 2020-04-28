@@ -87,7 +87,8 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	}
 	
 	private Piece makeMove (Position source, Position target){
-		Piece p = board.removePiece(source);   //retirar a peça da posição de origem
+		ChessPiece p = (ChessPiece)board.removePiece(source);   //retirar a peça da posição de origem
+		p.increaseMoveCount();    //INCREMENTAR UM MOVIMENTO
 		Piece capturedPiece = board.removePiece(target);    //remover uma possivel peça q esteja na posiçao de destino
 		board.placePiece(p, target);   //tira uma peça da origem e coloca no destino
 		
@@ -100,7 +101,8 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	}
 	
 	private void undoMove(Position source, Position target, Piece capturedPiece){  //desfazer o movimento
-		Piece p = board.removePiece(target);
+		ChessPiece p = (ChessPiece)board.removePiece(target);
+		p.decreaseMoveCount();
 		board.placePiece(p, source);
 		
 		if (capturedPiece != null){    //tem voltar a peça na posição de destino
