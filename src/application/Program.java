@@ -40,7 +40,7 @@ public class Program {
 				 if(capturedPiece != null){   
 					 captured.add(capturedPiece);   //adiciona na lista de peças capturadas
 				 }
-			}
+		}
 			catch(ChessException e){
 				System.out.println(e.getMessage());
 				sc.nextLine();
@@ -54,4 +54,4 @@ public class Program {
 		UI.printMatch(chessMatch, captured); //mostra a tela finalizada
 	}
 
-}
+	}
