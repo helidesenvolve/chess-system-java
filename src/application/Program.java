@@ -43,7 +43,11 @@ public class Program {
 				 
 				 if(chessMatch.getPromoted() != null){
 					 System.out.print("Enter piece for pormotion (B/N/Q/R): ");
-					 String type = sc.nextLine();
+					 String type = sc.nextLine().toUpperCase();   //letra mauiscula
+					 while(!type.equals("B") && !type.equals("N") && !type.equals("R") &&! type.equals("Q")){  //enquanto n digitar um valor valido...
+						 System.out.print("Invalid value! Enter piece for pormotion (B/N/Q/R): ");  //pedir p digitar um valor valido
+						 type = sc.nextLine().toUpperCase();   //letra mauiscula
+					 }
 					 chessMatch.replacePromotedPiece(type); //por padrao a peça sera rainha mas o usuario podera trocar, apos digitar a peça, ela sera colocada no jogo
 				 }
 			}
