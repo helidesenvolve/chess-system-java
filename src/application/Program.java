@@ -40,7 +40,13 @@ public class Program {
 				 if(capturedPiece != null){   
 					 captured.add(capturedPiece);   //adiciona na lista de peças capturadas
 				 }
-		}
+				 
+				 if(chessMatch.getPromoted() != null){
+					 System.out.print("Enter piece for pormotion (B/N/Q/R): ");
+					 String type = sc.nextLine();
+					 chessMatch.replacePromotedPiece(type); //por padrao a peça sera rainha mas o usuario podera trocar, apos digitar a peça, ela sera colocada no jogo
+				 }
+			}
 			catch(ChessException e){
 				System.out.println(e.getMessage());
 				sc.nextLine();

@@ -1,5 +1,6 @@
 package chess;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 	private boolean check;
 	private boolean checkMate;
 	private ChessPiece enPassantVulnerable;
+	private ChessPiece promoted;
 	
 	
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();  //lista com as peças que estao no tabuleiro
@@ -55,6 +57,10 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		return enPassantVulnerable;
 	}
 	
+	public ChessPiece getPromoted(){
+		return promoted;
+	}
+	
 	public ChessPiece[][]getPieces(){ //o pragram vai enxergar apenas a peça de xadrez(ChessPiece). e nao a camada de tabuleiro (PIece).
 		ChessPiece[][] mat = new ChessPiece[board.getRows()][board.getColumns()];
 		for(int i = 0; i < board.getColumns(); i++){
@@ -86,6 +92,18 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		
 		ChessPiece movedPiece = (ChessPiece)board.piece(target);   //peça que se moveu esta no destino (target)
 		
+		//specialmove promotion (ANTES DO CHECK PQ APOS A PROMOÇÃO PODE COLOCAR O REI EM CHEQUE)
+		promoted = null;
+		if(movedPiece instanceof Pawn){      //se a peça movimentada é um peão
+			if((movedPiece.getColor() == Color.WHITE && target.getRow() == 0) || (movedPiece.getColor() == Color.BLACK && target.getRow() == 7)){
+				promoted = (ChessPiece)board.piece(target);   //peça promovida: peão que esta na posição final
+				promoted = replacePromotedPiece("Q");   //peça substituta por padrão sera rainha, mas podera troca-la.
+			}
+			
+			
+		}
+		
+		
 		check = (testCheck(opponent(currentPlayer))) ? true : false;  //se o openente ficou em cheque recebe true senão false
 		
 		if(testCheckMate(opponent(currentPlayer))){
@@ -104,6 +122,33 @@ public class ChessMatch { //partida de xadrez (sera o coração do nosso pragrama)
 		}
 		
 		return (ChessPiece) capturedPiece;      //retornar a peça capturada. fazer um downcast pq a capturedPiece era do tipo Piece
+	}
+	
+	public ChessPiece replacePromotedPiece(String type){
+		if(promoted == null){
+			throw new IllegalStateException("There is no to be promoted");
+		}
+		if(!type.equals("B") && !type.equals("N") && !type.equals("R") && !type.equals("Q")){
+			throw new InvalidParameterException("Invalid type for promotion");
+		}
+		
+		Position pos = promoted.getChessPosition().toPosition();   //posição da peça a ser promovida
+		Piece p = board.removePiece(pos);   //peça p removida do tabuleiro
+		piecesOnTheBoard.remove(p); //peça p removida da lista de peças no tabuleiro
+		
+		ChessPiece newPiece = newPiece(type, promoted.getColor());  //peça da msm cor da peça promovida
+		board.placePiece(newPiece, pos);   //nova peça no local da peca promovida (pos)
+		piecesOnTheBoard.add(newPiece);   //add na lista a nova peça
+		
+		return newPiece;
+	}
+	
+	private ChessPiece newPiece(String type, Color color){
+		if(type.equals("B")) return new Bishop(board, color);
+		if(type.equals("N")) return new Knight(board, color);
+		if(type.equals("Q")) return new Queen(board, color);
+		return new Rook(board, color);
+
 	}
 	
 	private Piece makeMove (Position source, Position target){
